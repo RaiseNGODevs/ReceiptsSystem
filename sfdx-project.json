@@ -1,8 +1,12 @@
 {
   "packageDirectories": [
     {
-      "path": "force-app",
-      "default": true
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.NEXT",
+      "path": "./receipts-system",
+      "default": true,
+      "package": "Receipts_System",
+      "versionDescription": "Receipts System Package, it holds the necessary components for  Receipt Creation and Visualization"
     }
   ],
   "name": "ReceiptsSystem",

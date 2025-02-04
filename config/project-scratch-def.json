@@ -1,13 +1,30 @@
 {
-  "orgName": "Demo company",
-  "edition": "Developer",
-  "features": ["EnableSetPasswordInApi"],
+  "orgName": "Fundraising Org",
+  "edition": "Enterprise",
+  "language": "en_US",
+  "country": "PT",
+  "features": [
+    "AccountingSubledgerGrowthEdition",
+    "IndustriesActionPlan",
+    "AnalyticsQueryService",
+    "PublicSectorAccess",
+    "Fundraising",
+    "IndustriesSalesExcellenceAddOn",
+    "IndustriesServiceExcellenceAddOn",
+    "MarketingUser",
+    "ProgramManagement",
+    "OmniStudioDesigner",
+    "OmniStudioRuntime",
+    "EnableSetPasswordInApi",
+    "PersonAccounts"
+  ],
   "settings": {
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true
     },
-    "mobileSettings": {
-      "enableS1EncryptedStoragePref2": false
+    "IndustriesSettings": {
+      "enableFundraising": true,
+      "enableGroupMembershipPref": true
     }
   }
 }
