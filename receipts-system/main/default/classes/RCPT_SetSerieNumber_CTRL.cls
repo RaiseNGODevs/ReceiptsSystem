@@ -5,7 +5,6 @@ public class RCPT_SetSerieNumber_CTRL {
     
     public RCPT_SetSerieNumber_CTRL( Receipt__c[] receipts, Integer retrys ){
         this.receipts = receipts;
-        System.debug(retrys);
         this.retrys = retrys;        
     }
     
@@ -17,6 +16,7 @@ public class RCPT_SetSerieNumber_CTRL {
     public void process(){
         Savepoint sp = Database.setSavepoint();
         try{
+            System.debug(this.receipts.size());
             Set<String> yearsSet = new Set<String>();
             Set<String> typesSet = new Set<String>();
             for( Receipt__c receipt : this.receipts ){
@@ -27,7 +27,6 @@ public class RCPT_SetSerieNumber_CTRL {
             Map<String, Id> receiptBridgeMap = getBridgeMap( receiptSeriesList );
             List<SObject> toUpdate = setSerieNumber(this.receipts, receiptSeriesList, receiptBridgeMap);
             if (!toUpdate.isEmpty()) {
-                toUpdate.sort();
                 update toUpdate;
             }
         } catch( Exception e ) {
@@ -40,7 +39,6 @@ public class RCPT_SetSerieNumber_CTRL {
                               'Retrys: ' + this.retrys;
             new DL_DebugLog_CTRL('Recibos', 'RCPT_SetSerieNumber_CTRL', 'process', 'catchStatement', null, null, JSON.serializePretty(this.receipts), exceptionDetails, null, false, false).publish();
             if(this.retrys > 0){
-                System.debug(this.retrys);
                 retry(this.receipts, this.retrys);
             }
         }
@@ -55,28 +53,28 @@ public class RCPT_SetSerieNumber_CTRL {
                 Id key = receiptBridgeMap.get(mapKey);
                 Receipt_Serie__c relatedSerie = receiptSeriesList.get(key);
                 relatedSerie.Last_Number__c++;
-                toUpdate.add(relatedSerie);
+                receiptSeriesList.put(key, relatedSerie);
                 receipt.Receipt_Number__c  = relatedSerie.Prefix__c + ' ' + relatedSerie.Last_Number__c + '/' + relatedSerie.Year__c;
                 receipt.Status__c = 'Active';
                 toUpdate.add(receipt);
             }else{
-                Debug_Log_Event__e logCtrl = new DL_DebugLog_CTRL('Recibos', 'RCPT_SetSerieNumber_CTRL', 'setSerieNumber', 'SerieNotFound', null, null, JSON.serializePretty(receipt), 'Serie for the Receipt Type not found', receipt.Id, false, false).initEventLog();
-                debugLogEvents.add(logCtrl);
+                throw new DL_DebugLog_Exception('No series found for the given receipt: '+receipt.Id+' with Type: '+receipt.Transaction_Type__c+' and Year: '+receipt.Payment_Date__c.year());
             }
         }
-        if(!debugLogEvents.isEmpty()){
-            EventBus.publish(debugLogEvents);
-        }
+        update receiptSeriesList.values();
         return toUpdate;
     }
     
     private static Map<Id, Receipt_Serie__c> getReceiptSeriesMap(Set<String> yearsSet, Set<String> typesSet){
-        String typesString = String.join(typesSet, ',');
-        Map<Id, Receipt_Serie__c> serieMap = new Map<Id, Receipt_Serie__c>([
-                                                            SELECT Id, Year__c, Transaction_Type__c, Last_Number__c, Prefix__c
-                                                            FROM Receipt_Serie__c
-                                                            WHERE Active__c = TRUE AND Year__c IN :yearsSet AND Transaction_Type__c INCLUDES (:typesString)
-                                                ]);
+        String typesString = '(\'' + String.join(typesSet, '\', \'') + '\')';
+        String query = 'SELECT Id, Prefix__c, Last_Number__c, Year__c, Transaction_Type__c '+
+                        'FROM Receipt_Serie__c '+
+                        'WHERE Year__c IN :yearsSet AND Transaction_Type__c INCLUDES ' + typesString;
+        List<Receipt_Serie__c> serieList = Database.query(query);
+        Map<Id, Receipt_Serie__c> serieMap = new Map<Id, Receipt_Serie__c>();
+        for (Receipt_Serie__c serie : serieList) {
+            serieMap.put(serie.Id, serie);
+        }
         if(serieMap.isEmpty()){
             throw new DL_DebugLog_Exception('No series found for the given years and types');
         }
@@ -94,6 +92,6 @@ public class RCPT_SetSerieNumber_CTRL {
         return keyBridgeMap;
     }
     private static void retry(List<Receipt__c> receiptsString, Integer retrys) {
-        System.enqueueJob(new RCPT_QueueableRetry_CTRL(receiptsString, retrys), 1);                            
+        System.enqueueJob(new RCPT_Retry_QUEUEABLE(receiptsString, retrys), 1);                            
     }
 }

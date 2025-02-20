@@ -1,9 +1,9 @@
-public with sharing class RCPT_QueueableRetry_CTRL implements Queueable {
+public with sharing class RCPT_Retry_QUEUEABLE implements Queueable {
     private List<Receipt__c> receipts;
 
     private Integer retrys;
 
-    public RCPT_QueueableRetry_CTRL( List<Receipt__c> receipts, Integer retrys){
+    public RCPT_Retry_QUEUEABLE( List<Receipt__c> receipts, Integer retrys){
         this.receipts = receipts;
         this.retrys = retrys;
     }

@@ -19,7 +19,7 @@ public with sharing class RCPT_Process_TEST {
         input.actionType = 'create';
         List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ> flowList = new List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ>{input};
         Test.startTest();
-            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.generateFirstReceipts(flowList);
+            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.invocableProcessMethod(flowList);
         Test.stopTest();
         List<Receipt__c> updatedReceipts = [SELECT Id, Receipt_Number__c, Status__c FROM Receipt__c];
         Assert.areEqual(1, updatedReceipts.size(), 'Should have created Receipt');
@@ -40,7 +40,7 @@ public with sharing class RCPT_Process_TEST {
         input.actionType = 'cancel';
         List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ> flowList = new List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ>{input};
         Test.startTest();
-            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.generateFirstReceipts(flowList);
+            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.invocableProcessMethod(flowList);
         Test.stopTest();
         List<Receipt__c> updatedReceipts = [SELECT Id, Receipt_Number__c, Status__c FROM Receipt__c];
         Assert.areEqual('Cancelled', updatedReceipts[0].Status__c, 'Should have cancelled Receipt');
@@ -62,7 +62,7 @@ public with sharing class RCPT_Process_TEST {
         input.actionType = 'update';
         List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ> flowList = new List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ>{input};
         Test.startTest();
-            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.generateFirstReceipts(flowList);
+            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.invocableProcessMethod(flowList);
         Test.stopTest();
         List<Receipt__c> canceledReceipts = [SELECT Id, Receipt_Number__c, Status__c FROM Receipt__c Where Id = :receipt.Id];
         Assert.areEqual('Cancelled', canceledReceipts[0].Status__c, 'Should have cancelled first Receipt');
@@ -78,10 +78,12 @@ public with sharing class RCPT_Process_TEST {
         input.actionType = 'noSupport';
         List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ> flowList = new List<RCPT_FlowData_OBJ.RCPT_InputVariables_OBJ>{input};
         Test.startTest();
-            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.generateFirstReceipts(flowList);
+            List<RCPT_FlowData_OBJ.RCPT_OutputVariables_OBJ> output = RCPT_Process_CTRL.invocableProcessMethod(flowList);
         Test.stopTest();
-        Assert.isNotNull(output[0].errorMessage, 'Should have Error Message');
-        Assert.isFalse(output[0].success, 'Should have failed');
+        List<Debug_Log__c> log = [SELECT Id, Error_Message__c, Success__c FROM Debug_Log__c WHERE Source__c = 'Recibos'];
+        Assert.areEqual(1, log.size(), 'Should have created Error Log');
+        Assert.isNotNull(log[0].Error_Message__c, 'Should have Error Message');
+        Assert.isFalse(log[0].Success__c, 'Should have failed');
     }
     @isTest 
     public static void testReceiptSerieSuccess() {
