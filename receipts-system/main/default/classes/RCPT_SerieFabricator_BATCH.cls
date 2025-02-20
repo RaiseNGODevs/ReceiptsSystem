@@ -26,10 +26,7 @@ public with sharing class RCPT_SerieFabricator_BATCH implements Database.Batchab
                 toInsert.add(newSerie);
             }
             insert toInsert;
-            System.debug(toInsert.size());
-            System.debug(this.insertSize);
-            this.insertSize = this.insertSize + toInsert.size();
-            System.debug(this.insertSize);
+            this.insertSize =+ toInsert.size();
         }
         catch(Exception e){
             new DL_DebugLog_CTRL('Recibos',
