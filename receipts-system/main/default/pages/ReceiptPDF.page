@@ -1,0 +1,7 @@
+<apex:page controller="RCPT_ReceiptPDF_CTRL" showHeader="false" sidebar="false" renderAs="pdf">
+    <body>
+        <apex:outputPanel rendered="{!IF( receipt.Status__c == 'Cancelled', true, false)}">
+            <img src="{!$Resource.ReciboAnuladoWatermark}" style="position: fixed; z-index:-1;"/>
+        </apex:outputPanel>
+    </body>
+  </apex:page>
