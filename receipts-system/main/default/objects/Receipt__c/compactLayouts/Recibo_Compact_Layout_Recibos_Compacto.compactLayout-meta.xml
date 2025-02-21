@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Recibo_Compact_Layout_Recibos_Compacto</fullName>
-    <fields>Receipt_Number__c</fields>
-    <fields>Payment_Date__c</fields>
-    <label>Recibo Compact Layout Recibos - Compacto</label>
-</CompactLayout>
